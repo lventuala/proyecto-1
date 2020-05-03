@@ -1,0 +1,103 @@
+/* clases para efecto de carta : tomado de https://www.w3schools.com/howto/howto_css_flip_card.asp */
+
+.flip-card {
+	background-color: transparent;
+	border: 1px solid #f1f1f1;
+}
+
+/* This container is needed to position the front and back side */
+.flip-card-inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+/* Do an horizontal flip when you move the mouse over the flip box container */
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Position the front and back side */
+.flip-card-front, .flip-card-back {
+	position: absolute;
+    height:100%; 
+    width:100%;
+	-webkit-backface-visibility: hidden; /* Safari */
+	backface-visibility: hidden;
+}
+
+/* Style the front side (fallback if image is missing) */
+.flip-card-front {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Style the back side */
+.flip-card-back {
+    transform: rotateY(180deg);
+    background-image: url('../images/back-card.png');
+}
+
+/**
+ **Diseño de filas y columnas
+*/
+
+.col-separador {
+    margin: 5px; 
+}
+
+@media (min-width: 800px) { 
+    .tablero {
+        width: 700px; 
+        height: 800px; 
+        margin-top: 20px; 
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (min-width: 700px) and (max-width: 799px) { 
+    .tablero {
+        width: 600px; 
+        height: 700px; 
+        margin-top: 20px; 
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 699px) { 
+    .tablero {
+        width: 500px; 
+        height: 600px; 
+        margin-top: 20px; 
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (max-width: 599px) { 
+    .tablero {
+        width: 400px; 
+        height: 500px; 
+        margin-top: 20px; 
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+.fila {
+    width: 100%;
+}
+
+.columna {
+    float: left; 
+}
+
+
+
