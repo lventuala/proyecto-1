@@ -16,11 +16,11 @@
 }
 
 /* Do an horizontal flip when you move the mouse over the flip box container */
-/*
+
 .flip-card:hover .flip-card-inner {
-  transform: rotateY(180deg);
+  cursor: pointer; 
 }
-*/
+
 /* Position the front and back side */
 .flip-card-front, .flip-card-back {
 	position: absolute;
@@ -35,11 +35,13 @@
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    transform: rotateY(180deg);
 }
 
 /* Style the back side */
 .flip-card-back {
-    transform: rotateY(180deg);
+    
+    transform: rotateY(360deg);
     background-image: url('../images/back-card.png');
 }
 
