@@ -1,32 +1,60 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- CSS -->
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/app.css">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>IAW-MemTest</title>
-  </head>
-  <body>
-    <!-- Image and text -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">IAW-MemTest</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-    
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="form-inline my-2 my-lg-0">
-          <div class="form-group">
-            <input class="form-control mr-sm-2" type="text" placeholder="Usuario" aria-label="Usuario">
+  <!-- CSS -->
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/app.css">
+
+  <title>IAW-MemTest</title>
+</head>
+
+<body>
+  <!-- Image and text -->
+  <!--
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">IAW-MemTest</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <div class="form-inline my-2 my-lg-0">
+            <div class="form-group">
+              <input class="form-control mr-sm-2" type="text" placeholder="Usuario" aria-label="Usuario">
+            </div>
+
+            <div class="form-group">
+              <label for="id_dificultad">Dificultad</label>
+              <select class="form-control" id="id_dificultad" onchange="selectDificultad()">
+                <option>4x3</option>
+                <option>4x4</option>
+                <option>5x4</option>
+                <option>6x5</option>
+                <option>6x6</option>
+                <option>7x6</option>
+              </select>
+            </div>
+            
+            <button id="btn-iniciar" style="margin-left: 5px; " class="btn btn-outline-success my-2 my-sm-0" type="button">Iniciar</button>
           </div>
+        </div>
+      </nav>
+      -->
 
-          <div class="form-group">
-            <label style="margin-right: 5px;" for="id_dificultad">Dificultad</label>
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-12" style="width: 100%; height: auto;  background: lightsteelblue;">
+        <div class="form-inline row">
+
+          <div class="form-group mb-2">
+            <label for="id_dificultad">Dificultad</label>
             <select class="form-control" id="id_dificultad" onchange="selectDificultad()">
               <option>4x3</option>
               <option>4x4</option>
@@ -36,28 +64,52 @@
               <option>7x6</option>
             </select>
           </div>
-          
-          <button style="margin-left: 5px; " class="btn btn-outline-success my-2 my-sm-0" type="button" onclick="iniciarJuego()">Iniciar</button>
+
+          <div class="form-group mb-2">
+            <label for="id_select_jugadores">Jugadores</label>
+            <select class="form-control" id="id_select_jugadores" onchange="selectJugadores()">
+              <option value="1">1 Jugador</option>
+              <option value="2">2 Jugadores</option>
+            </select>
+          </div>
         </div>
       </div>
-    </nav>
 
-    <div class="container">
+      <div class="bloque-juego col-12">
+        <div class="row">
 
-      
-      <div id="id-tablero" class="tablero">
-          
-          
+          <div id="id_tablero" class="tablero col-sm-8 col-12">
+          </div>
+
+          <div class="col-sm-4 col-12">
+            <div class="row">
+              <button id="btn_iniciar" class="btn btn-outline-success col-12" type="button">Iniciar</button>
+              <div class="col-12">
+                <div id="bloque_jugadores" class="row">
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-      
+
     </div>
 
-    <!-- JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-  
-    <script src="js/app.js"></script>
-  </body>
+  </div>
+
+  <!-- JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+
+  <script src="js/app.js"></script>
+</body>
+
 </html>

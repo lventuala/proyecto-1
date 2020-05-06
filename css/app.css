@@ -1,6 +1,7 @@
 /* clases para efecto de carta : tomado de https://www.w3schools.com/howto/howto_css_flip_card.asp */
 
 .flip-card {
+    height: 100%;
 	background-color: transparent;
 	border: 1px solid #f1f1f1;
 }
@@ -32,64 +33,96 @@
 
 /* Style the front side (fallback if image is missing) */
 .flip-card-front {
-    background-size: cover;
+
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    
     transform: rotateY(180deg);
 }
 
 /* Style the back side */
 .flip-card-back {
-    
     transform: rotateY(360deg);
     background-image: url('../images/back-card.png');
 }
 
 /**
- **Diseño de filas y columnas
+ ** Diseño personal
 */
 
-.col-separador {
-    margin: 5px; 
+.bloque-juego {
+    width: 100%;
+    padding: 20px; 
 }
 
-@media (min-width: 800px) { 
+.bloque-jugador {
+    width: 100%; 
+    height: 200px;
+    margin-top: 10px; 
+}
+
+.tablero {
+
+    margin-left: 0;
+    margin-right: auto;
+    
+}
+
+@media (min-width: 1000px) {
     .tablero {
-        width: 700px; 
-        height: 800px; 
-        margin-top: 20px; 
-        margin-left: auto;
-        margin-right: auto;
+        width: 800px; 
+        height: 700px; 
+    }
+}
+
+@media (min-width: 900px) and (max-width: 999px) { 
+    .tablero {
+        width: 100%; 
+        height: 600px; 
+    }
+}
+
+
+@media (min-width: 800px) and (max-width: 899px) { 
+    .tablero {
+        width: 100%; 
+        height: 600px; 
     }
 }
 
 @media (min-width: 700px) and (max-width: 799px) { 
     .tablero {
-        width: 600px; 
+        width: 100%; 
         height: 700px; 
-        margin-top: 20px; 
-        margin-left: auto;
-        margin-right: auto;
     }
 }
 
 @media (min-width: 600px) and (max-width: 699px) { 
     .tablero {
-        width: 500px; 
+        width: 100%; 
         height: 600px; 
-        margin-top: 20px; 
-        margin-left: auto;
-        margin-right: auto;
     }
 }
 
-@media (max-width: 599px) { 
+@media  (min-width: 500px) and (max-width: 599px) { 
     .tablero {
-        width: 400px; 
+        width: 100%; 
         height: 500px; 
-        margin-top: 20px; 
-        margin-left: auto;
-        margin-right: auto;
+    }
+}
+
+@media  (min-width: 400px) and (max-width: 499px) { 
+    .tablero {
+        width: 100%; 
+        height: 400px; 
+    }
+}
+
+@media  (max-width: 399px) { 
+    .tablero {
+        width: 100%; 
+        height: 300px; 
     }
 }
 

@@ -31,8 +31,29 @@
 	 this.estado = estado; 
  }
 
-/************************************************/
 
+ /************************************************
+ * Definicion de jugador */
+var Jugador = function(id,name,puntos,border) {
+	this.id = id; 
+	this.name = name; 
+	this.puntos = puntos; 
+	this.border = border; 
+}
+
+Jugador.prototype.getId = function() {
+	return this.id; 
+}
+
+Jugador.prototype.sumarPunto = function() {
+	this.puntos++; 
+}
+
+Jugador.prototype.getBorder = function() {
+	return this.border; 
+}
+
+/************************************************/
 
 var cartas = new Map(); // todas las cartas que componen la jugada
 var imagenes = []; // todas las imagenes disponibles para cargar en las cartas
@@ -40,26 +61,99 @@ var carta_1 = null;
 var carta_2 = null; 
 var mostrar_segunda_carta = true; 
 var cant_cartas_pendientes = 0; 
+var jugadores = new Map();
+var id_jugador_activo = null; 
+var color_jugadores = ["orange", "blue"];
+var juego_iniciado = false; 
 
-var max_img_ls = 36;
+var max_img_ls = 40;
 for(var i = 1; i<=max_img_ls; i++) {
 	imagenes.push({
 		dir: './images/los_simpson/img'+i+'.png'
 	});
 }
 
-selectDificultad(); 
+reset();
 
-function iniciarJuego() {
-	$(".flip-card .flip-card-inner").css('transform', 'rotateY(180deg)');
+function reset() {
+	$('#btn_iniciar').click(iniciarJuego); 
 
-	setTimeout(function() {
-		$(".flip-card .flip-card-inner").css('transform', 'rotateY(360deg)');
-		$(".flip-card .flip-card-inner").css('transform', '');
-	}, 
-	3000 );
+	selectJugadores(); 
+
+	selectDificultad(); 
 }
 
+function selectJugadores() {
+	$('#bloque_jugadores').empty();
+	var cant = $('#id_select_jugadores').val(); 
+
+	for(var j = 0; j<cant; j++) {
+		var id = "id_jugador_"+j;
+
+		var border = '4px solid '+color_jugadores[j];
+		jugadores.set(id, new Jugador(id,"",0,border)); 
+
+		$('#bloque_jugadores').append('<div id="'+id+'" class="bloque-jugador col-12"></div>'); 
+		$('#'+id).css('border',border);
+	}
+}
+
+function setJugadorActivo() {
+	if (id_jugador_activo == null) {
+		id_jugador_activo = "id_jugador_0";
+	} else {
+		var str_id = id_jugador_activo.split("_");
+		var id = str_id[2];
+		if (id >= jugadores.size-1) {
+			id = 0; 
+		} else {
+			id++; 
+		}
+
+		id_jugador_activo = "id_jugador_"+id; 
+	}
+}
+
+function iniciarJuego() {
+	if (!juego_iniciado) {
+		$('#btn_iniciar').prop('disabled', true);
+		$(".flip-card .flip-card-inner").css('transform', 'rotateY(180deg)');
+
+		setTimeout(function() {
+			$(".flip-card .flip-card-inner").css('transform', 'rotateY(360deg)');
+			$(".flip-card .flip-card-inner").css('transform', '');
+		}, 
+		3000 );
+
+		// activo jugador 1
+		setJugadorActivo(); 
+
+		juego_iniciado = true;
+	}
+}
+
+function finalizarJuego() {
+
+}
+
+/**
+ * Si carta_1 y carta_2 son null -> la jugada fue perdida
+ * Sino, sumo punto para jugador activo y pinto las cartas
+ * del color correspondiente 
+ */
+function actualizarJugada(carta_1,carta_2) {
+	if (carta_1 == null || carta_2 == null) {
+		// selecciono proxumo jugador
+		setJugadorActivo(); 
+	} else {
+		// sumo punto al jugador y sigue jugando
+		console.log(id_jugador_activo); 
+		console.log(jugadores);
+		jugadores.get(id_jugador_activo).sumarPunto();
+		$("#"+carta_1.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
+		$("#"+carta_2.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
+	}
+}
 
 /**
  * Modifica la cantidad de cartas con la que se va a jugar
@@ -82,7 +176,7 @@ function selectDificultad() {
  * @param {*} m : cantidad de columnas del tablero 
  */
 function cargarCartas(n,m) {
-	$('#id-tablero').empty(); 
+	$('#id_tablero').empty(); 
 
 	var width_card = 100 / n; 
 	var height_card = 100 / m; 
@@ -115,15 +209,12 @@ function cargarCartas(n,m) {
 		html += '</div>'
 	}
 
-	$('#id-tablero').append(html); 
+	$('#id_tablero').append(html); 
 
 	// seteo el alto de las filas y el ancho de las columnas
 	$('.fila').css('height',height_card+'%'); 
-	$('.fila').css('padding','2px'); 
 	$('.columna').css('width',width_card+'%'); 
-	$('.columna').css('height','100%'); 
-	$('.columna').css('padding','2px'); 
-	$('.flip-card').css('height','100%'); 
+	$('.columna').css('height','100%');
 
 	//for(var i = 0; i<cartas.length; i++) {
 	cartas.forEach(c => {
@@ -140,61 +231,56 @@ function cargarCartas(n,m) {
  * Evento al hacer click en una carta
  */
 function seleccionarCarta(elem, c) {
-	var carta_seleccionada = cartas.get(elem.id); 
-	if (carta_seleccionada.getEstado() === 'back' && (carta_1 === null || carta_2 == null ) ) {
-		carta_seleccionada.setEstado('front');
-		$("#"+carta_seleccionada.getId()).css('transform', 'rotateY(180deg)');
+	if (juego_iniciado) {
+		var carta_seleccionada = cartas.get(elem.id); 
+		if (carta_seleccionada.getEstado() === 'back' && (carta_1 === null || carta_2 == null ) ) {
+			carta_seleccionada.setEstado('front');
+			$("#"+carta_seleccionada.getId()).css('transform', 'rotateY(180deg)');
 
-		if (carta_1 === null) {
-			carta_1 = carta_seleccionada; 
-		} else if (carta_2 === null) {
-			carta_2 = carta_seleccionada; 
+			if (carta_1 === null) {
+				carta_1 = carta_seleccionada; 
+			} else if (carta_2 === null) {
+				carta_2 = carta_seleccionada; 
 
-			// controlo las dos cartas seleccioandas
-			if ( carta_1.getDir() !== carta_2.getDir() ) {
-				
-					
-				setTimeout(function() {
-					$("#"+carta_1.getId()).css('border', '5px solid red');
-					$("#"+carta_2.getId()).css('border', '5px solid red');
+				// controlo las dos cartas seleccioandas
+				if ( carta_1.getDir() !== carta_2.getDir() ) {
 					setTimeout(function() {
-						$("#"+carta_1.getId()).css('border', 'none');
-						$("#"+carta_2.getId()).css('border', 'none');
-						$("#"+carta_1.getId()).css('transform', 'rotateY(360deg)');
-						$("#"+carta_2.getId()).css('transform', 'rotateY(360deg)');
+						$("#"+carta_1.getId()).css('border', '5px solid red');
+						$("#"+carta_2.getId()).css('border', '5px solid red');
+						setTimeout(function() {
+							$("#"+carta_1.getId()).css('border', 'none');
+							$("#"+carta_2.getId()).css('border', 'none');
+							$("#"+carta_1.getId()).css('transform', 'rotateY(360deg)');
+							$("#"+carta_2.getId()).css('transform', 'rotateY(360deg)');
 
-						carta_1.setEstado('back');
-						carta_2.setEstado('back');
+							carta_1.setEstado('back');
+							carta_2.setEstado('back');
 
-						carta_1 = null; 
-						carta_2 = null; 
+							carta_1 = null; 
+							carta_2 = null;
+
+							actualizarJugada(carta_1,carta_2);
 						},
 						(mostrar_segunda_carta?1000:0), // si se eligio la opcion de mostrar segunda carta -> espero unos segundos
 						carta_1, carta_2);
-				}, 
-				500, // si se eligio la opcion de mostrar segunda carta -> espero unos segundos
-				carta_1, carta_2, mostrar_segunda_carta);
-			} else {
-				cant_cartas_pendientes -= 2; 
-				carta_1 = null; 
-				carta_2 = null; 
+					}, 
+					500, // si se eligio la opcion de mostrar segunda carta -> espero unos segundos
+					carta_1, carta_2, mostrar_segunda_carta);
+				} else {
+					cant_cartas_pendientes -= 2; 
+					actualizarJugada(carta_1,carta_2);
 
-				if (cant_cartas_pendientes == 0) {
-					
+					carta_1 = null; 
+					carta_2 = null; 
+
+					if (cant_cartas_pendientes == 0) {
+						finalizarJuego();
+					}
 				}
 			}
 		}
 	}
 }
-
-function sleep(milliseconds) {
-	const date = Date.now();
-	let currentDate = null;
-	do {
-		currentDate = Date.now();
-	} while (currentDate - date < milliseconds);
-}
-
 
 /**
  * Inicializa con imagenes random las cartas. 
@@ -235,6 +321,7 @@ function initRandomCartas() {
 		// recupero imagen
 		var indice_img = Math.floor(Math.random() * imagenes.length); 
 		var img = imagenes.splice(indice_img, 1);
+		aux_imagenes.push(img[0]);
 
 		// asigno imagen a las cartas
 		carta_c1.setDir(img[0].dir); 
@@ -246,6 +333,7 @@ function initRandomCartas() {
 	}
 
 	cartas =  aux_cartas;
+	imagenes = imagenes.concat(aux_imagenes);
 
 }
 
