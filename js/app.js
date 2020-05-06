@@ -61,48 +61,75 @@ var carta_1 = null;
 var carta_2 = null; 
 var mostrar_segunda_carta = true; 
 var cant_cartas_pendientes = 0; 
+
+// la cantidad de colores determina la cantidad maxima de jugadores
 var jugadores = new Map();
+var color_jugadores = ['orange', 'blue', 'green']; 
 var id_jugador_activo = null; 
-var color_jugadores = ["orange", "blue"];
+
+// variable para determinar si el juego se inicio 
 var juego_iniciado = false; 
 
-var max_img_ls = 40;
-for(var i = 1; i<=max_img_ls; i++) {
-	imagenes.push({
-		dir: './images/los_simpson/img'+i+'.png'
-	});
+// grupo de imagens
+var grupo_imagenes = new Map(); 
+grupo_imagenes.set('id_los_simpson',{'id':'id_los_simpson', 'descripcion':'Los Simpson', 'dir':'./images/los_simpson/', 'max_img': 40})
+grupo_imagenes.set('id_marvel',{'id':'id_marvel', 'descripcion':'Marvel', 'dir':'./images/marvel/', 'max_img': 43})
+
+// cargo cantidad de jugadores de acuerdo a la cantidad de colores
+for(var j = 1; j<=color_jugadores.length; j++) {
+	$('#id_select_jugadores').append('<option value="'+j+'">'+j+' '+(j==1?'jugador':'jugadores')+'</option>'); 
 }
+
+// cargo grupos de imagenes 
+grupo_imagenes.forEach( gi => {
+	$('#id_grupo_imagenes').append('<option value="'+gi.id+'">'+gi.descripcion+'</option>'); 
+} ); 
 
 reset();
 
-function reset() {
-	$('#btn_iniciar').click(iniciarJuego); 
-
-	selectJugadores(); 
+function selectImagenes() {
+	var id = $('#id_grupo_imagenes').val();
+	
+	// cargo imagenes 
+	var max_img = grupo_imagenes.get(id).max_img;
+	imagenes = [];
+	for(var i = 1; i<=max_img; i++) {
+		imagenes.push({
+			dir: grupo_imagenes.get(id).dir+'/img'+i+'.png'
+		});
+	}	
 
 	selectDificultad(); 
 }
 
+function reset() {
+	$('#id_btn_iniciar').click(iniciarJuego); 
+
+	selectJugadores(); 
+
+	selectImagenes(); 
+}
+
 function selectJugadores() {
-	$('#bloque_jugadores').empty();
+	$('#id_bloque_jugadores').empty();
 	var cant = $('#id_select_jugadores').val(); 
 
 	for(var j = 0; j<cant; j++) {
-		var id = "id_jugador_"+j;
+		var id = 'id_jugador_'+j;
 
 		var border = '4px solid '+color_jugadores[j];
-		jugadores.set(id, new Jugador(id,"",0,border)); 
+		jugadores.set(id, new Jugador(id,'',0,border)); 
 
-		$('#bloque_jugadores').append('<div id="'+id+'" class="bloque-jugador col-12"></div>'); 
+		$('#id_bloque_jugadores').append('<div id="'+id+'" class="bloque-jugador col-12"></div>'); 
 		$('#'+id).css('border',border);
 	}
 }
 
 function setJugadorActivo() {
 	if (id_jugador_activo == null) {
-		id_jugador_activo = "id_jugador_0";
+		id_jugador_activo = 'id_jugador_0';
 	} else {
-		var str_id = id_jugador_activo.split("_");
+		var str_id = id_jugador_activo.split('_');
 		var id = str_id[2];
 		if (id >= jugadores.size-1) {
 			id = 0; 
@@ -110,25 +137,25 @@ function setJugadorActivo() {
 			id++; 
 		}
 
-		id_jugador_activo = "id_jugador_"+id; 
+		id_jugador_activo = 'id_jugador_'+id; 
 	}
 }
 
 function iniciarJuego() {
 	if (!juego_iniciado) {
-		$('#btn_iniciar').prop('disabled', true);
-		$(".flip-card .flip-card-inner").css('transform', 'rotateY(180deg)');
-
-		setTimeout(function() {
-			$(".flip-card .flip-card-inner").css('transform', 'rotateY(360deg)');
-			$(".flip-card .flip-card-inner").css('transform', '');
-		}, 
-		3000 );
-
+		$('#id_btn_iniciar').prop('disabled', true);
+		$('.flip-card .flip-card-inner').css('transform', 'rotateY(180deg)');
+		
 		// activo jugador 1
 		setJugadorActivo(); 
 
-		juego_iniciado = true;
+		setTimeout(function() {
+			$('.flip-card .flip-card-inner').css('transform', 'rotateY(360deg)');
+			$('.flip-card .flip-card-inner').css('transform', '');
+
+			juego_iniciado = true;
+		}, 
+		3000 );
 	}
 }
 
@@ -147,11 +174,9 @@ function actualizarJugada(carta_1,carta_2) {
 		setJugadorActivo(); 
 	} else {
 		// sumo punto al jugador y sigue jugando
-		console.log(id_jugador_activo); 
-		console.log(jugadores);
 		jugadores.get(id_jugador_activo).sumarPunto();
-		$("#"+carta_1.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
-		$("#"+carta_2.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
+		$('#'+carta_1.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
+		$('#'+carta_2.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
 	}
 }
 
@@ -159,9 +184,9 @@ function actualizarJugada(carta_1,carta_2) {
  * Modifica la cantidad de cartas con la que se va a jugar
  */
 function selectDificultad() {
-	var dificultad = $("#id_dificultad").val(); 
+	var dificultad = $('#id_dificultad').val(); 
 
-	var nxm = dificultad.split("x");
+	var nxm = dificultad.split('x');
 	n = nxm[0];
 	m = nxm[1];
 
@@ -218,8 +243,8 @@ function cargarCartas(n,m) {
 
 	//for(var i = 0; i<cartas.length; i++) {
 	cartas.forEach(c => {
-		//$("#"+c.getId()).css('transform', 'rotateY(180deg)');
-		$("#"+c.getId()).click(function () {
+		//$('#'+c.getId()).css('transform', 'rotateY(180deg)');
+		$('#'+c.getId()).click(function () {
 			seleccionarCarta(this, c);
 		});
 	});
@@ -235,7 +260,7 @@ function seleccionarCarta(elem, c) {
 		var carta_seleccionada = cartas.get(elem.id); 
 		if (carta_seleccionada.getEstado() === 'back' && (carta_1 === null || carta_2 == null ) ) {
 			carta_seleccionada.setEstado('front');
-			$("#"+carta_seleccionada.getId()).css('transform', 'rotateY(180deg)');
+			$('#'+carta_seleccionada.getId()).css('transform', 'rotateY(180deg)');
 
 			if (carta_1 === null) {
 				carta_1 = carta_seleccionada; 
@@ -245,13 +270,13 @@ function seleccionarCarta(elem, c) {
 				// controlo las dos cartas seleccioandas
 				if ( carta_1.getDir() !== carta_2.getDir() ) {
 					setTimeout(function() {
-						$("#"+carta_1.getId()).css('border', '5px solid red');
-						$("#"+carta_2.getId()).css('border', '5px solid red');
+						$('#'+carta_1.getId()).css('border', '5px solid red');
+						$('#'+carta_2.getId()).css('border', '5px solid red');
 						setTimeout(function() {
-							$("#"+carta_1.getId()).css('border', 'none');
-							$("#"+carta_2.getId()).css('border', 'none');
-							$("#"+carta_1.getId()).css('transform', 'rotateY(360deg)');
-							$("#"+carta_2.getId()).css('transform', 'rotateY(360deg)');
+							$('#'+carta_1.getId()).css('border', 'none');
+							$('#'+carta_2.getId()).css('border', 'none');
+							$('#'+carta_1.getId()).css('transform', 'rotateY(360deg)');
+							$('#'+carta_2.getId()).css('transform', 'rotateY(360deg)');
 
 							carta_1.setEstado('back');
 							carta_2.setEstado('back');
@@ -328,8 +353,8 @@ function initRandomCartas() {
 		carta_c2.setDir(img[0].dir); 
 
 		// configuro la carta en los div's correspondientes
-		$("#"+carta_c1.getId()+" .flip-card-front").css('background-image', 'url("'+carta_c1.getDir()+'")');
-		$("#"+carta_c2.getId()+" .flip-card-front").css('background-image', 'url("'+carta_c2.getDir()+'")');
+		$('#'+carta_c1.getId()+' .flip-card-front').css('background-image', 'url("'+carta_c1.getDir()+'")');
+		$('#'+carta_c2.getId()+' .flip-card-front').css('background-image', 'url("'+carta_c2.getDir()+'")');
 	}
 
 	cartas =  aux_cartas;
