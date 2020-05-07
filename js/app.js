@@ -34,23 +34,102 @@
 
  /************************************************
  * Definicion de jugador */
-var Jugador = function(id,name,puntos,border) {
+var Jugador = function(numero,id,nombre,border) {
+	this.numero = numero; 
 	this.id = id; 
-	this.name = name; 
-	this.puntos = puntos; 
+	this.nombre = nombre; 
 	this.border = border; 
+	this.puntos_favor = 0; 
+	this.puntos_contra = 0;
+	this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
+	this.activo = false;
+
+	this.tiempo = null; 
+}
+
+Jugador.prototype.getNumero = function() {
+	return this.numero; 
 }
 
 Jugador.prototype.getId = function() {
 	return this.id; 
 }
 
-Jugador.prototype.sumarPunto = function() {
-	this.puntos++; 
+Jugador.prototype.getNombre = function() {
+	return this.nombre; 
+}
+
+Jugador.prototype.setNombre = function(nombre) {
+	this.nombre = nombre; 
 }
 
 Jugador.prototype.getBorder = function() {
 	return this.border; 
+}
+
+Jugador.prototype.sumarPuntoFavor = function() {
+	this.puntos_favor++; 
+}
+
+Jugador.prototype.getPuntosFavor = function() {
+	return this.puntos_favor; 
+}
+
+Jugador.prototype.sumarPuntoContra = function() {
+	this.puntos_contra++; 
+}
+
+Jugador.prototype.getPuntosContra = function() {
+	return this.puntos_contra; 
+}
+
+Jugador.prototype.getTiempoJuego = function() {
+	return this.tiempo_juego; 
+}
+
+Jugador.prototype.isActivo = function() {
+	return this.activo;
+}
+
+Jugador.prototype.setActivo = function(activo) {
+	this.activo = activo; 
+}
+
+Jugador.prototype.iniciarTiempo = function() {
+	var jugador = this; 
+	this.tiempo = setInterval(function() {
+		jugador.getTiempoJuego().mili += 10; 
+		if (jugador.getTiempoJuego().mili == 1000) {
+			jugador.getTiempoJuego().mili = 0; 
+			jugador.getTiempoJuego().seg++; 
+		}
+
+		if (jugador.getTiempoJuego().seg == 60) {
+			jugador.getTiempoJuego().seg = 0; 
+			jugador.getTiempoJuego().min++; 
+		}
+
+		if (jugador.getTiempoJuego().min == 60) {
+			jugador.getTiempoJuego().min = 0; 
+			jugador.getTiempoJuego().hr++; 
+		}
+
+		var html = 'Tiempo : <span>'; 
+		html += (jugador.getTiempoJuego().hr > 9?'':'0')+jugador.getTiempoJuego().hr + ':'
+		html += (jugador.getTiempoJuego().min > 9?'':'0') + jugador.getTiempoJuego().min + ':'; 
+		html += (jugador.getTiempoJuego().seg > 9?'':'0') + jugador.getTiempoJuego().seg + '.';
+		html += (jugador.getTiempoJuego().mili <= 9?'00': (jugador.getTiempoJuego().mili <= 99?'0':'') ) + jugador.getTiempoJuego().mili;
+		html += '</span>';
+		$('#id_tiempo_juego_'+jugador.getNumero()).html(html);
+	 }, 10);
+}
+
+Jugador.prototype.pararTiempo = function() {
+	clearInterval(this.tiempo);
+}
+
+Jugador.prototype.getTiempo = function() {
+	return this.tiempo; 
 }
 
 /************************************************/
@@ -70,10 +149,11 @@ var id_jugador_activo = null;
 // variable para determinar si el juego se inicio 
 var juego_iniciado = false; 
 
-// grupo de imagens
+// grupo de imagens (agregando aca la info de una nueva carpeta -> recupera las imagenes)
 var grupo_imagenes = new Map(); 
 grupo_imagenes.set('id_los_simpson',{'id':'id_los_simpson', 'descripcion':'Los Simpson', 'dir':'./images/los_simpson/', 'max_img': 40})
 grupo_imagenes.set('id_marvel',{'id':'id_marvel', 'descripcion':'Marvel', 'dir':'./images/marvel/', 'max_img': 43})
+grupo_imagenes.set('id_animales',{'id':'id_animales', 'descripcion':'Animales', 'dir':'./images/animales/', 'max_img': 44})
 
 // cargo cantidad de jugadores de acuerdo a la cantidad de colores
 for(var j = 1; j<=color_jugadores.length; j++) {
@@ -114,53 +194,93 @@ function selectJugadores() {
 	$('#id_bloque_jugadores').empty();
 	var cant = $('#id_select_jugadores').val(); 
 
-	for(var j = 0; j<cant; j++) {
+	for(var j = 1; j<=cant; j++) {
 		var id = 'id_jugador_'+j;
 
-		var border = '4px solid '+color_jugadores[j];
-		jugadores.set(id, new Jugador(id,'',0,border)); 
+		var border = '4px solid '+color_jugadores[j-1];
+		jugadores.set(id, new Jugador(j,id,'',border)); 
 
 		$('#id_bloque_jugadores').append('<div id="'+id+'" class="bloque-jugador col-12"></div>'); 
+		
+		var html = '';
+		html += '<div>';
+		html += '<div class="form-group">';
+		html += '<input type="text" class="form-control font-info" id="id_nombre_'+j+'" placeholder="Nombre Jugador '+j+'">';
+		html += '</div>';
+		html += '<div class="form-group">';
+		html += '<span class="form-control font-info" id="id_puntos_favor_'+j+'">Puntos a favor : 00</span>';
+		html += '</div>';
+		html += '<div class="form-group">';
+		html += '<span class="form-control font-info" id="id_puntos_contra_'+j+'">Puntos en contra : 00</span>';
+		html += '</div>';
+		html += '<div class="form-group">';
+		html += '<span class="form-control font-info" id="id_tiempo_juego_'+j+'">Tiempo : 00:00:00</span>';
+		html += '</div>';
+		html += '</div>';
+		$('#'+id).append(html);
+
 		$('#'+id).css('border',border);
 	}
 }
 
 function setJugadorActivo() {
 	if (id_jugador_activo == null) {
-		id_jugador_activo = 'id_jugador_0';
+		id_jugador_activo = 'id_jugador_1';
 	} else {
-		var str_id = id_jugador_activo.split('_');
-		var id = str_id[2];
-		if (id >= jugadores.size-1) {
-			id = 0; 
+		jugadores.get(id_jugador_activo).pararTiempo(); 
+
+		var id = jugadores.get(id_jugador_activo).getNumero();
+		if (id >= jugadores.size) {
+			id = 1; 
 		} else {
 			id++; 
 		}
 
 		id_jugador_activo = 'id_jugador_'+id; 
 	}
+
+	// informo jugador activo
+	var jugador = jugadores.get(id_jugador_activo); 
+	$('#id_turno').html('Turno Actual : <span>'+jugador.getNombre()+'</span>');
+	jugador.setActivo(true);
+	jugador.iniciarTiempo(); 
 }
 
 function iniciarJuego() {
 	if (!juego_iniciado) {
+		// controlo y configuro nombre de los jugdores
+		var cant = $('#id_select_jugadores').val(); 
+		for(var j = 1; j<=cant; j++) {
+			var nombre = $('#id_nombre_'+j).val();
+			console.log("NOMBER = "+nombre)
+			if ( nombre === '' ) {
+				alert('Ingrese el nombre del jugador '+j);
+				return; 
+			}
+
+			jugadores.get('id_jugador_'+j).setNombre(nombre); 
+		}
+
 		$('#id_btn_iniciar').prop('disabled', true);
 		$('.flip-card .flip-card-inner').css('transform', 'rotateY(180deg)');
-		
-		// activo jugador 1
-		setJugadorActivo(); 
-
+	
+		// set tiempo juego
 		setTimeout(function() {
 			$('.flip-card .flip-card-inner').css('transform', 'rotateY(360deg)');
 			$('.flip-card .flip-card-inner').css('transform', '');
 
 			juego_iniciado = true;
+
+			// activo jugador 1
+			setJugadorActivo(); 
 		}, 
 		3000 );
 	}
 }
 
 function finalizarJuego() {
-
+	// freno tiempo del jugador actual
+	jugadores.get(id_jugador_activo).pararTiempo(); 
 }
 
 /**
@@ -171,12 +291,21 @@ function finalizarJuego() {
 function actualizarJugada(carta_1,carta_2) {
 	if (carta_1 == null || carta_2 == null) {
 		// selecciono proxumo jugador
+		jugadores.get(id_jugador_activo).sumarPuntoContra();
+		var puntos = jugadores.get(id_jugador_activo).getPuntosContra(); 
+		var html = 'Puntos en contra : '+(puntos > 9?'':'0')+puntos; 
+		$('#id_puntos_contra_'+jugadores.get(id_jugador_activo).getNumero()).html(html);
+
 		setJugadorActivo(); 
 	} else {
 		// sumo punto al jugador y sigue jugando
-		jugadores.get(id_jugador_activo).sumarPunto();
+		jugadores.get(id_jugador_activo).sumarPuntoFavor();
 		$('#'+carta_1.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
 		$('#'+carta_2.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
+
+		var puntos = jugadores.get(id_jugador_activo).getPuntosFavor(); 
+		var html = 'Puntos a favor : '+(puntos > 9?'':'0')+puntos; 
+		$('#id_puntos_favor_'+jugadores.get(id_jugador_activo).getNumero()).html(html);
 	}
 }
 

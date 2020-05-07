@@ -15,38 +15,6 @@
 </head>
 
 <body>
-  <!-- Image and text -->
-  <!--
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">IAW-MemTest</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-      
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <div class="form-inline my-2 my-lg-0">
-            <div class="form-group">
-              <input class="form-control mr-sm-2" type="text" placeholder="Usuario" aria-label="Usuario">
-            </div>
-
-            <div class="form-group">
-              <label for="id_dificultad">Dificultad</label>
-              <select class="form-control" id="id_dificultad" onchange="selectDificultad()">
-                <option>4x3</option>
-                <option>4x4</option>
-                <option>5x4</option>
-                <option>6x5</option>
-                <option>6x6</option>
-                <option>7x6</option>
-              </select>
-            </div>
-            
-            <button id="btn-iniciar" style="margin-left: 5px; " class="btn btn-outline-success my-2 my-sm-0" type="button">Iniciar</button>
-          </div>
-        </div>
-      </nav>
-      -->
-
   <div class="container-fluid">
 
     <div class="row">
@@ -81,13 +49,17 @@
 
       <div class="bloque-juego col-12">
         <div class="row">
-
-          <div id="id_tablero" class="tablero col-sm-8 col-12">
+          <div class="col-sm-8 col-12">
+            <div class="row">
+              <div id="id_turno" class="font-info col-12"></div>
+              <div id="id_tablero" class="tablero col-12"></div>
+            </div>
           </div>
 
           <div class="col-sm-4 col-12">
             <div class="row">
               <button id="id_btn_iniciar" class="btn btn-outline-success col-12" type="button">Iniciar</button>
+              
               <div class="col-12">
                 <div id="id_bloque_jugadores" class="row">                  
                 </div>
