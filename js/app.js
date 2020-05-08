@@ -87,6 +87,10 @@ Jugador.prototype.getTiempoJuego = function() {
 	return this.tiempo_juego; 
 }
 
+Jugador.prototype.resetTiempoJuego = function() {
+	this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
+}
+
 Jugador.prototype.isActivo = function() {
 	return this.activo;
 }
@@ -128,8 +132,15 @@ Jugador.prototype.pararTiempo = function() {
 	clearInterval(this.tiempo);
 }
 
-Jugador.prototype.getTiempo = function() {
-	return this.tiempo; 
+Jugador.prototype.reset = function() {
+	this.puntos_favor = 0; 
+	this.puntos_contra = 0;
+	this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
+	this.activo = false;
+
+	clearInterval(this.tiempo);
+
+	this.tiempo = null; 
 }
 
 /************************************************/
@@ -139,6 +150,8 @@ var imagenes = []; // todas las imagenes disponibles para cargar en las cartas
 var carta_1 = null; 
 var carta_2 = null; 
 var mostrar_segunda_carta = true; 
+var filas = 0;
+var columnas = 0; 
 var cant_cartas_pendientes = 0; 
 
 // la cantidad de colores determina la cantidad maxima de jugadores
@@ -165,8 +178,14 @@ grupo_imagenes.forEach( gi => {
 	$('#id_grupo_imagenes').append('<option value="'+gi.id+'">'+gi.descripcion+'</option>'); 
 } ); 
 
-reset();
 
+selectJugadores(); 
+selectImagenes();
+
+/**
+ * Carga las imagenes de acuerdo al grupo seleccionado por el usuario y 
+ * setea la dificultad. 
+ */
 function selectImagenes() {
 	var id = $('#id_grupo_imagenes').val();
 	
@@ -183,29 +202,47 @@ function selectImagenes() {
 }
 
 function reset() {
-	$('#id_btn_iniciar').click(iniciarJuego); 
+	var cant = jugadores.size
+	for(var j = 1; j<=cant; j++) {
+		var jugador = jugadores.get('id_jugador_'+j); 
+		jugador.reset();
 
-	selectJugadores(); 
-
-	selectImagenes(); 
+		$('#id_puntos_favor_'+j).html('Puntos a favor : 00'); 
+		$('#id_puntos_contra_'+j).html('Puntos en contra : 00'); 
+		$('#id_tiempo_juego_'+j).html('Tiempo : 00:00:00.000');
+	}
 }
 
 function selectJugadores() {
+	jugadores = new Map();
+	$('#id_jugador_name').empty();
 	$('#id_bloque_jugadores').empty();
+
 	var cant = $('#id_select_jugadores').val(); 
 
 	for(var j = 1; j<=cant; j++) {
 		var id = 'id_jugador_'+j;
+		console.log("ID = ", id);
 
 		var border = '4px solid '+color_jugadores[j-1];
 		jugadores.set(id, new Jugador(j,id,'',border)); 
+
+		$('#id_jugador_name').append('<div id="'+id+'_nombre"></div>'); 
+		
+		var html = '';
+		html += '<div>';
+		html += '<div class="form-group">';
+		html += '<input type="text" class="form-control font-info" id="id_nombre_'+j+'" placeholder="Nombre Jugador '+j+'">';
+		html += '</div>';
+		html += '</div>';
+		$('#'+id+'_nombre').append(html);
 
 		$('#id_bloque_jugadores').append('<div id="'+id+'" class="bloque-jugador col-12"></div>'); 
 		
 		var html = '';
 		html += '<div>';
 		html += '<div class="form-group">';
-		html += '<input type="text" class="form-control font-info" id="id_nombre_'+j+'" placeholder="Nombre Jugador '+j+'">';
+		html += '<span class="form-control font-info" id="id_block_nombre_'+j+'"></span>';
 		html += '</div>';
 		html += '<div class="form-group">';
 		html += '<span class="form-control font-info" id="id_puntos_favor_'+j+'">Puntos a favor : 00</span>';
@@ -214,15 +251,18 @@ function selectJugadores() {
 		html += '<span class="form-control font-info" id="id_puntos_contra_'+j+'">Puntos en contra : 00</span>';
 		html += '</div>';
 		html += '<div class="form-group">';
-		html += '<span class="form-control font-info" id="id_tiempo_juego_'+j+'">Tiempo : 00:00:00</span>';
+		html += '<span class="form-control font-info" id="id_tiempo_juego_'+j+'">Tiempo : 00:00:00.000</span>';
 		html += '</div>';
 		html += '</div>';
-		$('#'+id).append(html);
+		$('#'+id).html(html);
 
 		$('#'+id).css('border',border);
 	}
 }
 
+/**
+ * Setea el primer jugador o el siguiente si ya hay un jugador activo. 
+ */
 function setJugadorActivo() {
 	if (id_jugador_activo == null) {
 		id_jugador_activo = 'id_jugador_1';
@@ -246,41 +286,93 @@ function setJugadorActivo() {
 	jugador.iniciarTiempo(); 
 }
 
-function iniciarJuego() {
-	if (!juego_iniciado) {
-		// controlo y configuro nombre de los jugdores
-		var cant = $('#id_select_jugadores').val(); 
-		for(var j = 1; j<=cant; j++) {
-			var nombre = $('#id_nombre_'+j).val();
-			console.log("NOMBER = "+nombre)
-			if ( nombre === '' ) {
-				alert('Ingrese el nombre del jugador '+j);
-				return; 
-			}
 
-			jugadores.get('id_jugador_'+j).setNombre(nombre); 
+function mostrarJuego() {
+	// controlo y configuro nombre de los jugdores
+	var cant = $('#id_select_jugadores').val(); 
+	for(var j = 1; j<=cant; j++) {
+		var nombre = $('#id_nombre_'+j).val();
+		console.log("NOMBER = "+nombre)
+		if ( nombre === '' ) {
+			alert('Ingrese el nombre del jugador '+j);
+			return; 
 		}
 
-		$('#id_btn_iniciar').prop('disabled', true);
-		$('.flip-card .flip-card-inner').css('transform', 'rotateY(180deg)');
-	
-		// set tiempo juego
-		setTimeout(function() {
-			$('.flip-card .flip-card-inner').css('transform', 'rotateY(360deg)');
-			$('.flip-card .flip-card-inner').css('transform', '');
+		jugadores.get('id_jugador_'+j).setNombre(nombre); 
 
-			juego_iniciado = true;
-
-			// activo jugador 1
-			setJugadorActivo(); 
-		}, 
-		3000 );
+		$('#id_block_nombre_'+j).html(nombre); 
+		$('#id_block_nombre_'+j).css('text-decoration','underline'); 
+		$('#id_block_nombre_'+j).css('font-size','1.6em'); 
 	}
+
+	// oculto panel de iniciar jugada y muestro juego
+	$('#block-inicio').css('display','none');
+	$('#block-juego').css('display','block');
+
+	cargarCartas(); 
 }
 
+/**
+ * Inicia una jugada -> ya estan cargadas las cargas y los jugadores
+ */
+function iniciarJuego() {
+	if (juego_iniciado) {
+		reset(); 
+		cargarCartas(); 
+	}
+
+	$('#id_btn_iniciar').prop('disabled', true);
+	$('#id_btn_configurar').prop('disabled', true);
+	$('#id_btn_iniciar').html('Re-iniciar'); 
+	$('.flip-card .flip-card-inner').css('transform', 'rotateY(180deg)');
+
+	// set tiempo juego
+	setTimeout(function() {
+		$('.flip-card .flip-card-inner').css('transform', 'rotateY(360deg)');
+		$('.flip-card .flip-card-inner').css('transform', '');
+
+		juego_iniciado = true;
+
+		// activo jugador 1
+		setJugadorActivo(); 
+
+		$('#id_btn_configurar').prop('disabled', false);
+	}, 
+	3000 );
+}
+
+/**
+ * Funcion que se llama cuando finaliza la jugada (se seleccionan las ultimas dos cargas iguales)
+ */
 function finalizarJuego() {
 	// freno tiempo del jugador actual
 	jugadores.get(id_jugador_activo).pararTiempo(); 
+	$('#id_btn_iniciar').prop('disabled', false);
+	id_jugador_activo = null; 
+}
+
+/**
+ * Muestra interface para configurar el juego - sale de la jugada actual
+ */
+function configurar() {
+	reset(); 
+	if (juego_iniciado) {
+		jugadores.get(id_jugador_activo).pararTiempo(); 
+		$('#id_btn_iniciar').prop('disabled', false);
+	}
+
+	juego_iniciado = false; 
+
+	selectJugadores(); 
+	selectImagenes();
+	id_jugador_activo = null; 	
+
+	$('#id_btn_iniciar').html('Iniciar'); 
+
+	$('#block-inicio').css('display','block');
+	$('#block-juego').css('display','none');
+
+	$('#id_turno').html('');
 }
 
 /**
@@ -289,23 +381,25 @@ function finalizarJuego() {
  * del color correspondiente 
  */
 function actualizarJugada(carta_1,carta_2) {
-	if (carta_1 == null || carta_2 == null) {
-		// selecciono proxumo jugador
-		jugadores.get(id_jugador_activo).sumarPuntoContra();
-		var puntos = jugadores.get(id_jugador_activo).getPuntosContra(); 
-		var html = 'Puntos en contra : '+(puntos > 9?'':'0')+puntos; 
-		$('#id_puntos_contra_'+jugadores.get(id_jugador_activo).getNumero()).html(html);
+	if (id_jugador_activo != null) {
+		if (carta_1 == null || carta_2 == null) {
+			// selecciono proxumo jugador
+			jugadores.get(id_jugador_activo).sumarPuntoContra();
+			var puntos = jugadores.get(id_jugador_activo).getPuntosContra(); 
+			var html = 'Puntos en contra : '+(puntos > 9?'':'0')+puntos; 
+			$('#id_puntos_contra_'+jugadores.get(id_jugador_activo).getNumero()).html(html);
 
-		setJugadorActivo(); 
-	} else {
-		// sumo punto al jugador y sigue jugando
-		jugadores.get(id_jugador_activo).sumarPuntoFavor();
-		$('#'+carta_1.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
-		$('#'+carta_2.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
+			setJugadorActivo(); 
+		} else {
+			// sumo punto al jugador y sigue jugando
+			jugadores.get(id_jugador_activo).sumarPuntoFavor();
+			$('#'+carta_1.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
+			$('#'+carta_2.getId()).css('border',jugadores.get(id_jugador_activo).getBorder());
 
-		var puntos = jugadores.get(id_jugador_activo).getPuntosFavor(); 
-		var html = 'Puntos a favor : '+(puntos > 9?'':'0')+puntos; 
-		$('#id_puntos_favor_'+jugadores.get(id_jugador_activo).getNumero()).html(html);
+			var puntos = jugadores.get(id_jugador_activo).getPuntosFavor(); 
+			var html = 'Puntos a favor : '+(puntos > 9?'':'0')+puntos; 
+			$('#id_puntos_favor_'+jugadores.get(id_jugador_activo).getNumero()).html(html);
+		}
 	}
 }
 
@@ -316,33 +410,30 @@ function selectDificultad() {
 	var dificultad = $('#id_dificultad').val(); 
 
 	var nxm = dificultad.split('x');
-	n = nxm[0];
-	m = nxm[1];
+	filas = nxm[0];
+	columnas = nxm[1];
 
-	cant_cartas_pendientes = n*m; 
-
-	cargarCartas(n,m);
+	cant_cartas_pendientes = filas*columnas; 
 }
 
 /**
- * Carga las cartas en el tablero de nxm
- * @param {*} n : cantidad de filas del tablero
- * @param {*} m : cantidad de columnas del tablero 
+ * Carga las cartas en el tablero de filasXcolumnas
  */
-function cargarCartas(n,m) {
+function cargarCartas() {
+	
 	$('#id_tablero').empty(); 
 
-	var width_card = 100 / n; 
-	var height_card = 100 / m; 
+	var width_card = 100 / filas; 
+	var height_card = 100 / columnas; 
 
 	var html = '';
-	for(var f = 0; f<m; f++) {
-		html += '<div id="id-fila+'+f+'" class="fila">'; 
+	for(var c = 0; c<columnas; c++) {
+		html += '<div id="id-fila+'+c+'" class="fila">'; 
 
-		for(var c = 0; c<n; c++) {
+		for(var f = 0; f<filas; f++) {
 			var id = 'id_c'+f+c; 
 
-			html += '<div id="id-columna-"'+c+' class="columna">'; 
+			html += '<div id="id-columna-"'+f+' class="columna">'; 
 
 			html += '<div class="flip-card">';
 			html += '		<div id="'+id+'" class="flip-card-inner">';

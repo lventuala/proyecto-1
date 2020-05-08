@@ -14,36 +14,56 @@
   <title>IAW-MemTest</title>
 </head>
 
-<body>
-  <div class="container-fluid">
+<body >
+  
 
-    <div class="row">
+    <div id="block-inicio" class="text-center">
+      <form class="form-signin">
+        <img class="mb-4" src="./images/back-card.png" alt="" width="72" height="72">
+
+        <h1 class="h3 mb-3 font-weight-normal">Configurar jugada</h1>
+
+        <div class="form-group mb-2">
+          <label for="id_dificultad">Dificultad</label>
+          <select class="form-control" id="id_dificultad" onchange="selectDificultad()">
+            <option>4x3</option>
+            <option>4x4</option>
+            <option>5x4</option>
+            <option>6x5</option>
+            <option>6x6</option>
+            <option>7x6</option>
+          </select>
+        </div>
+        
+        <div class="checkbox mb-3">
+          <label> <input type="checkbox" value="remember-me"> Intercambiar Cartas </label>
+        </div>
+
+        <div class="form-group mb-2">
+          <label for="id_select_jugadores">Jugadores</label>
+          <select class="form-control" id="id_select_jugadores" onchange="selectJugadores()">
+          </select>
+        </div>
+
+        <div class="form-group mb-2">
+          <div id="id_jugador_name"></div>
+        </div>
+
+        <div class="form-group mb-2">
+          <label for="id_grupo_imagenes">Estilo Cartas</label>
+          <select class="form-control" id="id_grupo_imagenes" onchange="selectImagenes()">
+          </select>
+        </div>
+
+        <button class="btn btn-lg btn-primary btn-block" type="button" onclick="mostrarJuego()">Iniciar</button>
+      </form>
+    </div>
+
+
+  <div id="block-juego" class="container-fluid" style="display: none">
+    <div class="row" >
       <div class="col-12" style="width: 100%; height: auto;  background: lightsteelblue;">
         <div class="form-inline row">
-
-          <div class="form-group mb-2">
-            <label for="id_dificultad">Dificultad</label>
-            <select class="form-control" id="id_dificultad" onchange="selectDificultad()">
-              <option>4x3</option>
-              <option>4x4</option>
-              <option>5x4</option>
-              <option>6x5</option>
-              <option>6x6</option>
-              <option>7x6</option>
-            </select>
-          </div>
-
-          <div class="form-group mb-2">
-            <label for="id_select_jugadores">Jugadores</label>
-            <select class="form-control" id="id_select_jugadores" onchange="selectJugadores()">
-            </select>
-          </div>
-
-          <div class="form-group mb-2">
-            <label for="id_grupo_imagenes">Estilo Cartas</label>
-            <select class="form-control" id="id_grupo_imagenes" onchange="selectImagenes()">
-            </select>
-          </div>
         </div>
       </div>
 
@@ -58,7 +78,9 @@
 
           <div class="col-sm-4 col-12">
             <div class="row">
-              <button id="id_btn_iniciar" class="btn btn-outline-success col-12" type="button">Iniciar</button>
+              
+              <button id="id_btn_iniciar" class="btn btn-outline-success col-6" type="button" onclick="iniciarJuego()">Iniciar</button>
+              <button id="id_btn_configurar" class="btn btn-outline-success col-6" type="button" onclick="configurar()">Configurar</button>
               
               <div class="col-12">
                 <div id="id_bloque_jugadores" class="row">                  
@@ -67,11 +89,8 @@
             </div>
           </div>
         </div>
-
       </div>
-
     </div>
-
   </div>
 
   <!-- JavaScript -->
