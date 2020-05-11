@@ -24,7 +24,7 @@
         <h1 class="h3 mb-3 font-weight-normal">Configurar jugada</h1>
 
         <div class="form-group mb-2">
-          <label for="id_dificultad">Dificultad</label>
+          <label for="id_dificultad">Cantidad de cartas</label>
           <select class="form-control" id="id_dificultad" onchange="selectDificultad()">
             <option>4x3</option>
             <option>4x4</option>
@@ -36,7 +36,11 @@
         </div>
         
         <div class="checkbox mb-3">
-          <label> <input type="checkbox" value="remember-me"> Intercambiar Cartas </label>
+          <label> <input id="id_intercambiar_cartas" type="checkbox" value="remember-me"> Intercambiar Cartas </label>
+        </div>
+
+        <div class="checkbox mb-3">
+          <label> <input id="id_no_mostrar_cartas" type="checkbox" value="remember-me"> No mostrar cartas al inicio </label>
         </div>
 
         <div class="form-group mb-2">
@@ -71,7 +75,7 @@
         <div class="row">
           <div class="col-sm-8 col-12">
             <div class="row">
-              <div id="id_turno" class="font-info col-12"></div>
+              
               <div id="id_tablero" class="tablero col-12"></div>
             </div>
           </div>
@@ -81,6 +85,9 @@
               
               <button id="id_btn_iniciar" class="btn btn-outline-success col-6" type="button" onclick="iniciarJuego()">Iniciar</button>
               <button id="id_btn_configurar" class="btn btn-outline-success col-6" type="button" onclick="configurar()">Configurar</button>
+
+              <div id="id_inicio" class="font-info col-12"></div>
+              <div id="id_turno" class="font-info col-12"></div>
               
               <div class="col-12">
                 <div id="id_bloque_jugadores" class="row">                  

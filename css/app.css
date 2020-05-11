@@ -121,7 +121,14 @@ body {
 
 #id_turno {
     padding: 5px 0 5px 15px; 
+    font-size: 1.1em;
+}
+
+#id_inicio {
+    padding: 5px 0 5px 15px; 
     font-size: 1.6em;
+    color:red; 
+    text-align: center;
 }
 
 .font-info {
@@ -192,6 +199,16 @@ body {
     .tablero {
         width: 100%; 
         height: 300px; 
+    }
+
+
+    #id_turno {
+        font-size: 0.9em;
+    }
+
+    #id_turno span {
+        font-size: 1.1em;
+        text-decoration: underline;
     }
 }
 

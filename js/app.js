@@ -1,148 +1,151 @@
 /************************************************
  * Definicion de carta */
+//= function(id,dir,estado)
+class Carta {
+    constructor(id,dir,estado) {
+        this.id = id; 
+        this.dir = dir; 
+        this.estado = estado; 
+    }
 
- var Carta = function(id,dir,estado) {
-	this.id = id; 
-	this.dir = dir; 
-	this.estado = estado; 
- }
+    getId() {
+	   return this.id;
+    }
 
- Carta.prototype.getId = function() {
-	 return this.id;
- }
+    setId(id) {
+	   this.id = id; 
+    }
 
- Carta.prototype.setId = function(id) {
-	 this.id = id; 
- }
+    getDir() {
+	   return this.dir; 
+    }
 
- Carta.prototype.getDir = function() {
-	 return this.dir; 
- }
+    setDir(dir) {
+	   this.dir = dir; 
+    }
 
- Carta.prototype.setDir = function(dir) {
-	 this.dir = dir; 
- }
+    getEstado() {
+	   return this.estado; 
+    }
 
- Carta.prototype.getEstado = function() {
-	 return this.estado; 
- }
-
- Carta.prototype.setEstado = function(estado) {
-	 this.estado = estado; 
- }
+    setEstado(estado) {
+	   this.estado = estado; 
+    }
+}
 
 
  /************************************************
  * Definicion de jugador */
-var Jugador = function(numero,id,nombre,border) {
-	this.numero = numero; 
-	this.id = id; 
-	this.nombre = nombre; 
-	this.border = border; 
-	this.puntos_favor = 0; 
-	this.puntos_contra = 0;
-	this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
-	this.activo = false;
+class Jugador {
+	constructor(numero,id,nombre,border) {
+		this.numero = numero; 
+		this.id = id; 
+		this.nombre = nombre; 
+		this.border = border; 
+		this.puntos_favor = 0; 
+		this.puntos_contra = 0;
+		this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
+		this.activo = false;
 
-	this.tiempo = null; 
+		this.tiempo = null; 
+	}
+
+	getNumero() {
+		return this.numero; 
+	}
+
+	getId() {
+		return this.id; 
+	}
+
+	getNombre() {
+		return this.nombre; 
+	}
+
+	setNombre (nombre) {
+		this.nombre = nombre; 
+	}
+
+	getBorder() {
+		return this.border; 
+	}
+
+	sumarPuntoFavor() {
+		this.puntos_favor++; 
+	}
+
+	getPuntosFavor() {
+		return this.puntos_favor; 
+	}
+
+	sumarPuntoContra() {
+		this.puntos_contra++; 
+	}
+
+	getPuntosContra() {
+		return this.puntos_contra; 
+	}
+
+	getTiempoJuego() {
+		return this.tiempo_juego; 
+	}
+
+	resetTiempoJuego() {
+		this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
+	}
+
+	isActivo() {
+		return this.activo;
+	}
+
+	setActivo (activo) {
+		this.activo = activo; 
+	}
+
+	iniciarTiempo() {
+		var jugador = this; 
+		this.tiempo = setInterval(function() {
+			jugador.getTiempoJuego().mili += 10; 
+			if (jugador.getTiempoJuego().mili == 1000) {
+				jugador.getTiempoJuego().mili = 0; 
+				jugador.getTiempoJuego().seg++; 
+			}
+
+			if (jugador.getTiempoJuego().seg == 60) {
+				jugador.getTiempoJuego().seg = 0; 
+				jugador.getTiempoJuego().min++; 
+			}
+
+			if (jugador.getTiempoJuego().min == 60) {
+				jugador.getTiempoJuego().min = 0; 
+				jugador.getTiempoJuego().hr++; 
+			}
+
+			var html = 'Tiempo : <span>'; 
+			html += (jugador.getTiempoJuego().hr > 9?'':'0')+jugador.getTiempoJuego().hr + ':'
+			html += (jugador.getTiempoJuego().min > 9?'':'0') + jugador.getTiempoJuego().min + ':'; 
+			html += (jugador.getTiempoJuego().seg > 9?'':'0') + jugador.getTiempoJuego().seg + '.';
+			html += (jugador.getTiempoJuego().mili <= 9?'00': (jugador.getTiempoJuego().mili <= 99?'0':'') ) + jugador.getTiempoJuego().mili;
+			html += '</span>';
+			$('#id_tiempo_juego_'+jugador.getNumero()).html(html);
+		}, 10);
+	}
+
+	pararTiempo() {
+		clearInterval(this.tiempo);
+	}
+
+	reset() {
+		this.puntos_favor = 0; 
+		this.puntos_contra = 0;
+		this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
+		this.activo = false;
+
+		clearInterval(this.tiempo);
+
+		this.tiempo = null; 
+	}
 }
-
-Jugador.prototype.getNumero = function() {
-	return this.numero; 
-}
-
-Jugador.prototype.getId = function() {
-	return this.id; 
-}
-
-Jugador.prototype.getNombre = function() {
-	return this.nombre; 
-}
-
-Jugador.prototype.setNombre = function(nombre) {
-	this.nombre = nombre; 
-}
-
-Jugador.prototype.getBorder = function() {
-	return this.border; 
-}
-
-Jugador.prototype.sumarPuntoFavor = function() {
-	this.puntos_favor++; 
-}
-
-Jugador.prototype.getPuntosFavor = function() {
-	return this.puntos_favor; 
-}
-
-Jugador.prototype.sumarPuntoContra = function() {
-	this.puntos_contra++; 
-}
-
-Jugador.prototype.getPuntosContra = function() {
-	return this.puntos_contra; 
-}
-
-Jugador.prototype.getTiempoJuego = function() {
-	return this.tiempo_juego; 
-}
-
-Jugador.prototype.resetTiempoJuego = function() {
-	this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
-}
-
-Jugador.prototype.isActivo = function() {
-	return this.activo;
-}
-
-Jugador.prototype.setActivo = function(activo) {
-	this.activo = activo; 
-}
-
-Jugador.prototype.iniciarTiempo = function() {
-	var jugador = this; 
-	this.tiempo = setInterval(function() {
-		jugador.getTiempoJuego().mili += 10; 
-		if (jugador.getTiempoJuego().mili == 1000) {
-			jugador.getTiempoJuego().mili = 0; 
-			jugador.getTiempoJuego().seg++; 
-		}
-
-		if (jugador.getTiempoJuego().seg == 60) {
-			jugador.getTiempoJuego().seg = 0; 
-			jugador.getTiempoJuego().min++; 
-		}
-
-		if (jugador.getTiempoJuego().min == 60) {
-			jugador.getTiempoJuego().min = 0; 
-			jugador.getTiempoJuego().hr++; 
-		}
-
-		var html = 'Tiempo : <span>'; 
-		html += (jugador.getTiempoJuego().hr > 9?'':'0')+jugador.getTiempoJuego().hr + ':'
-		html += (jugador.getTiempoJuego().min > 9?'':'0') + jugador.getTiempoJuego().min + ':'; 
-		html += (jugador.getTiempoJuego().seg > 9?'':'0') + jugador.getTiempoJuego().seg + '.';
-		html += (jugador.getTiempoJuego().mili <= 9?'00': (jugador.getTiempoJuego().mili <= 99?'0':'') ) + jugador.getTiempoJuego().mili;
-		html += '</span>';
-		$('#id_tiempo_juego_'+jugador.getNumero()).html(html);
-	 }, 10);
-}
-
-Jugador.prototype.pararTiempo = function() {
-	clearInterval(this.tiempo);
-}
-
-Jugador.prototype.reset = function() {
-	this.puntos_favor = 0; 
-	this.puntos_contra = 0;
-	this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
-	this.activo = false;
-
-	clearInterval(this.tiempo);
-
-	this.tiempo = null; 
-}
-
 /************************************************/
 
 var cartas = new Map(); // todas las cartas que componen la jugada
@@ -153,6 +156,8 @@ var mostrar_segunda_carta = true;
 var filas = 0;
 var columnas = 0; 
 var cant_cartas_pendientes = 0; 
+var no_mostrar_cartas_iniciales = false; 
+var intercambiar_cartas = false; 
 
 // la cantidad de colores determina la cantidad maxima de jugadores
 var jugadores = new Map();
@@ -202,6 +207,8 @@ function selectImagenes() {
 }
 
 function reset() {
+	cant_cartas_pendientes = filas*columnas; // reinicio jugadas
+
 	var cant = jugadores.size
 	for(var j = 1; j<=cant; j++) {
 		var jugador = jugadores.get('id_jugador_'+j); 
@@ -222,7 +229,6 @@ function selectJugadores() {
 
 	for(var j = 1; j<=cant; j++) {
 		var id = 'id_jugador_'+j;
-		console.log("ID = ", id);
 
 		var border = '4px solid '+color_jugadores[j-1];
 		jugadores.set(id, new Jugador(j,id,'',border)); 
@@ -286,13 +292,14 @@ function setJugadorActivo() {
 	jugador.iniciarTiempo(); 
 }
 
-
+/**
+ * 
+ */
 function mostrarJuego() {
 	// controlo y configuro nombre de los jugdores
 	var cant = $('#id_select_jugadores').val(); 
 	for(var j = 1; j<=cant; j++) {
 		var nombre = $('#id_nombre_'+j).val();
-		console.log("NOMBER = "+nombre)
 		if ( nombre === '' ) {
 			alert('Ingrese el nombre del jugador '+j);
 			return; 
@@ -309,6 +316,10 @@ function mostrarJuego() {
 	$('#block-inicio').css('display','none');
 	$('#block-juego').css('display','block');
 
+	// habilito botones
+	$('#id_btn_iniciar').prop('disabled', false);
+	$('#id_btn_configurar').prop('disabled', false);
+
 	cargarCartas(); 
 }
 
@@ -321,6 +332,12 @@ function iniciarJuego() {
 		cargarCartas(); 
 	}
 
+	// mostrar cartas iniciales
+	this.no_mostrar_cartas_iniciales = $('#id_no_mostrar_cartas').is(':checked'); 
+	this.intercambiar_cartas = $('#id_intercambiar_cartas').is(':checked');
+
+	$('#id_turno').html('');
+
 	$('#id_btn_iniciar').prop('disabled', true);
 	$('#id_btn_configurar').prop('disabled', true);
 	$('#id_btn_iniciar').html('Re-iniciar'); 
@@ -331,23 +348,37 @@ function iniciarJuego() {
 		$('.flip-card .flip-card-inner').css('transform', 'rotateY(360deg)');
 		$('.flip-card .flip-card-inner').css('transform', '');
 
-		juego_iniciado = true;
+		var seg = 5; 
+		var tiempoInicial = setInterval(function() {
+			seg--;
+			if (seg == 0) { 
+				$('#id_inicio').html(''); 
+				clearInterval(tiempoInicial);
+				juego_iniciado = true;
 
-		// activo jugador 1
-		setJugadorActivo(); 
+				// activo jugador 1
+				setJugadorActivo(); 
+	
+				$('#id_btn_configurar').prop('disabled', false);
+				
+			} else {
+				$('#id_inicio').html('Inicia en 0'+seg); 
+			}
+		}, 1000);
 
-		$('#id_btn_configurar').prop('disabled', false);
+		
 	}, 
-	3000 );
+	(no_mostrar_cartas_iniciales?0:3000) );
 }
 
 /**
  * Funcion que se llama cuando finaliza la jugada (se seleccionan las ultimas dos cargas iguales)
  */
-function finalizarJuego() {
+function finalizaJuego() {
 	// freno tiempo del jugador actual
 	jugadores.get(id_jugador_activo).pararTiempo(); 
 	$('#id_btn_iniciar').prop('disabled', false);
+	$('#id_btn_configurar').prop('disabled', false);
 	id_jugador_activo = null; 
 }
 
@@ -356,9 +387,8 @@ function finalizarJuego() {
  */
 function configurar() {
 	reset(); 
-	if (juego_iniciado) {
+	if (juego_iniciado && id_jugador_activo != null) {
 		jugadores.get(id_jugador_activo).pararTiempo(); 
-		$('#id_btn_iniciar').prop('disabled', false);
 	}
 
 	juego_iniciado = false; 
@@ -464,7 +494,7 @@ function cargarCartas() {
 	//for(var i = 0; i<cartas.length; i++) {
 	cartas.forEach(c => {
 		//$('#'+c.getId()).css('transform', 'rotateY(180deg)');
-		$('#'+c.getId()).click(function () {
+		$('#'+c.getId()).click(function() {
 			seleccionarCarta(this, c);
 		});
 	});
@@ -493,18 +523,39 @@ function seleccionarCarta(elem, c) {
 						$('#'+carta_1.getId()).css('border', '5px solid red');
 						$('#'+carta_2.getId()).css('border', '5px solid red');
 						setTimeout(function() {
-							$('#'+carta_1.getId()).css('border', 'none');
-							$('#'+carta_2.getId()).css('border', 'none');
 							$('#'+carta_1.getId()).css('transform', 'rotateY(360deg)');
 							$('#'+carta_2.getId()).css('transform', 'rotateY(360deg)');
 
-							carta_1.setEstado('back');
-							carta_2.setEstado('back');
+							setTimeout(function() {
+								if (intercambiar_cartas) {
+									var dir_aux = carta_1.getDir(); 
+									carta_1.setDir(carta_2.getDir()); 
+									carta_2.setDir(dir_aux); 
 
-							carta_1 = null; 
-							carta_2 = null;
+									$('#'+carta_1.getId()+' .flip-card-front').css('background-image', 'url("'+carta_1.getDir()+'")');
+									$('#'+carta_2.getId()+' .flip-card-front').css('background-image', 'url("'+carta_2.getDir()+'")');
+								}
 
-							actualizarJugada(carta_1,carta_2);
+								$('#'+carta_1.getId()).css('transform', 'rotateY(180deg)');
+								$('#'+carta_2.getId()).css('transform', 'rotateY(180deg)');
+
+								setTimeout(function() {
+									$('#'+carta_1.getId()).css('border', 'none');
+									$('#'+carta_2.getId()).css('border', 'none');
+									$('#'+carta_1.getId()).css('transform', 'rotateY(360deg)');
+									$('#'+carta_2.getId()).css('transform', 'rotateY(360deg)');
+
+									carta_1.setEstado('back');
+									carta_2.setEstado('back');
+
+									carta_1 = null; 
+									carta_2 = null;
+
+									actualizarJugada(carta_1,carta_2);
+								}, (intercambiar_cartas?500:0), 
+								carta_1, carta_2);
+							},(intercambiar_cartas?500:0), 
+							carta_1,carta_2);
 						},
 						(mostrar_segunda_carta?1000:0), // si se eligio la opcion de mostrar segunda carta -> espero unos segundos
 						carta_1, carta_2);
@@ -519,7 +570,7 @@ function seleccionarCarta(elem, c) {
 					carta_2 = null; 
 
 					if (cant_cartas_pendientes == 0) {
-						finalizarJuego();
+						finalizaJuego();
 					}
 				}
 			}
