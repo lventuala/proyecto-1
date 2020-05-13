@@ -48,6 +48,8 @@ class Jugador {
 		this.activo = false;
 
 		this.tiempo = null; 
+
+		this.total = 0; 
 	}
 
 	getNumero() {
@@ -90,6 +92,30 @@ class Jugador {
 		return this.tiempo_juego; 
 	}
 
+	getStrTiempoJuego() {
+		var str_tiempo = this.getHr() + ':';
+		str_tiempo += this.getMin() + ':'; 
+		str_tiempo += this.getSeg() + '.';
+		str_tiempo += this.getMili();
+		return str_tiempo; 
+	}
+
+	getHr() {
+		return (this.getTiempoJuego().hr > 9?'':'0')+this.getTiempoJuego().hr; 
+	}
+	
+	getMin() {
+		return (this.getTiempoJuego().min > 9?'':'0') + this.getTiempoJuego().min; 
+	}
+
+	getSeg() {
+		return (this.getTiempoJuego().seg > 9?'':'0') + this.getTiempoJuego().seg; 
+	}
+
+	getMili() {
+		return (this.getTiempoJuego().mili <= 9?'00': (this.getTiempoJuego().mili <= 99?'0':'') ) + this.getTiempoJuego().mili; 
+	}
+
 	resetTiempoJuego() {
 		this.tiempo_juego = {'hr':0, 'min':0, 'seg':0, 'mili': 0};
 	}
@@ -122,10 +148,7 @@ class Jugador {
 			}
 
 			var html = 'Tiempo : <span>'; 
-			html += (jugador.getTiempoJuego().hr > 9?'':'0')+jugador.getTiempoJuego().hr + ':'
-			html += (jugador.getTiempoJuego().min > 9?'':'0') + jugador.getTiempoJuego().min + ':'; 
-			html += (jugador.getTiempoJuego().seg > 9?'':'0') + jugador.getTiempoJuego().seg + '.';
-			html += (jugador.getTiempoJuego().mili <= 9?'00': (jugador.getTiempoJuego().mili <= 99?'0':'') ) + jugador.getTiempoJuego().mili;
+			html += jugador.getStrTiempoJuego(); 
 			html += '</span>';
 			$('#id_tiempo_juego_'+jugador.getNumero()).html(html);
 		}, 10);
@@ -145,21 +168,34 @@ class Jugador {
 
 		this.tiempo = null; 
 	}
-}
-/************************************************/
 
+	setTotal(total) {
+		this.total = total; 
+	}
+
+	getTotal() {
+		return this.total; 
+	}
+}
+
+/************************************************/
+// variables principales para el juego
 var cartas = new Map(); // todas las cartas que componen la jugada
 var imagenes = []; // todas las imagenes disponibles para cargar en las cartas
 var carta_1 = null; 
 var carta_2 = null; 
-var mostrar_segunda_carta = true; 
 var filas = 0;
 var columnas = 0; 
 var cant_cartas_pendientes = 0; 
+var html_modal = ""; 
+var arr_dificultades = ['4x3','4x4','5x4','6x5','6x6','7x6']; 
+
+// variables de configuracion
+var mostrar_segunda_carta = true; 
 var no_mostrar_cartas_iniciales = false; 
 var intercambiar_cartas = false; 
 
-// la cantidad de colores determina la cantidad maxima de jugadores
+// la cantidad de colores -> determina la cantidad maxima de jugadores
 var jugadores = new Map();
 var color_jugadores = ['orange', 'blue', 'green']; 
 var id_jugador_activo = null; 
@@ -174,15 +210,42 @@ grupo_imagenes.set('id_marvel',{'id':'id_marvel', 'descripcion':'Marvel', 'dir':
 grupo_imagenes.set('id_animales',{'id':'id_animales', 'descripcion':'Animales', 'dir':'./images/animales/', 'max_img': 44})
 
 // cargo cantidad de jugadores de acuerdo a la cantidad de colores
+var html_item = ""; 
+var html_info = ""; 
 for(var j = 1; j<=color_jugadores.length; j++) {
+	
+//	localStorage.removeItem('jugadores_'+j);
+
+
 	$('#id_select_jugadores').append('<option value="'+j+'">'+j+' '+(j==1?'jugador':'jugadores')+'</option>'); 
+
+	// agrego tab para mensaje modal 
+	var id_tab_jugador = 'id_tab_jugador_'+j; 
+	var tab_jugador = 'tab_jugador_'+j; 
+	html_item += '<li class="nav-item">'; 
+	html_item += '<a class="nav-link" id="'+id_tab_jugador+'" data-toggle="pill" href="#'+tab_jugador+'" role="tab" aria-controls="'+tab_jugador+'" aria-selected="true">'+j+' '+(j==1?'jugador':'jugadores')+'</a>'; 
+	html_item += '</li>';
+
+	html_info += '<div class="tab-pane fade" id="'+tab_jugador+'" role="tabpanel" aria-labelledby="'+tab_jugador+'"> </div>'; 
+
 }
+
+var tab_html = ''; 
+tab_html += '<ul class="nav nav-pills mb-3" id="myTab" role="tablist">'; 
+tab_html += html_item; 
+tab_html += '</ul>'; 
+tab_html += '<div class="tab-content" id="myTabContent">'; 
+tab_html += html_info; 
+tab_html += '</div>'; 
+$("#id_modal div div").html(tab_html);
+
+//$('#myTab li:nth-child(1) a').tab('show');
+//$("#id_modal").modal();
 
 // cargo grupos de imagenes 
 grupo_imagenes.forEach( gi => {
 	$('#id_grupo_imagenes').append('<option value="'+gi.id+'">'+gi.descripcion+'</option>'); 
 } ); 
-
 
 selectJugadores(); 
 selectImagenes();
@@ -293,7 +356,7 @@ function setJugadorActivo() {
 }
 
 /**
- * 
+ * Muestra pantalla de juego
  */
 function mostrarJuego() {
 	// controlo y configuro nombre de los jugdores
@@ -328,6 +391,7 @@ function mostrarJuego() {
  */
 function iniciarJuego() {
 	if (juego_iniciado) {
+		juego_iniciado = false; 
 		reset(); 
 		cargarCartas(); 
 	}
@@ -365,8 +429,6 @@ function iniciarJuego() {
 				$('#id_inicio').html('Inicia en 0'+seg); 
 			}
 		}, 1000);
-
-		
 	}, 
 	(no_mostrar_cartas_iniciales?0:3000) );
 }
@@ -380,6 +442,149 @@ function finalizaJuego() {
 	$('#id_btn_iniciar').prop('disabled', false);
 	$('#id_btn_configurar').prop('disabled', false);
 	id_jugador_activo = null; 
+
+	// calculo jugador ganador
+	guardarYMostrarJugadorGanador();
+}
+
+/**
+ * Mostrar el jugador ganador al finalizar jugada
+ */
+function guardarYMostrarJugadorGanador() {
+	var orden = [];
+	var arr_guardar = [];
+	for (var j = 1; j<=this.jugadores.size; j++) {
+		var j_actual = this.jugadores.get('id_jugador_'+j);
+		var insertado = false;
+		for(var i = 0; i<orden.length; i++) {
+			if (orden[i].getPuntosFavor() < j_actual.getPuntosFavor()) {
+				orden.splice(i,0,j_actual);
+				arr_guardar.splice(
+					i,0,
+					{
+					'nombre':j_actual.getNombre(),
+					'favor':j_actual.getPuntosFavor(),
+					'contra':j_actual.getPuntosContra(),
+					'hr':j_actual.getHr(), 
+					'min':j_actual.getMin(), 
+					'seg':j_actual.getSeg(), 
+					'mili':j_actual.getMili()
+				});
+				insertado = true; 
+				break;
+			} else if (
+				orden[i].getPuntosFavor() == j_actual.getPuntosFavor() &&
+				orden[i].getPuntosContra() > j_actual.getPuntosContra()
+				) {
+					orden.splice(i,0,j_actual);
+					arr_guardar.splice(
+						i,0,
+						{
+						'nombre':j_actual.getNombre(),
+						'favor':j_actual.getPuntosFavor(),
+						'contra':j_actual.getPuntosContra(),
+						'hr':j_actual.getHr(), 
+						'min':j_actual.getMin(), 
+						'seg':j_actual.getSeg(), 
+						'mili':j_actual.getMili()
+					});
+					insertado = true; 
+					break;
+			} else if(
+				orden[i].getPuntosFavor() == j_actual.getPuntosFavor() &&
+				orden[i].getPuntosContra() == j_actual.getPuntosContra()
+				) {
+					// chequeo tiempo de jugada
+					var tj = j_actual.getTiempoJuego();
+					var tg = orden[i].getTiempoJuego();
+
+					var suma_ganador = tg.mili + (tg.seg * 1000) + (tg.min * 60 * 1000) + (tg.hr * 60 * 60 * 1000);
+					var suma_j_actual = tj.mili + (tj.seg * 1000) + (tj.min * 60 * 1000) + (tj.hr * 60 * 60 * 1000);
+
+					if (suma_j_actual < suma_ganador) {
+						orden.splice(i,0,j_actual);
+						arr_guardar.splice(
+							i,0,
+							{
+							'nombre':j_actual.getNombre(),
+							'favor':j_actual.getPuntosFavor(),
+							'contra':j_actual.getPuntosContra(),
+							'hr':j_actual.getHr(), 
+							'min':j_actual.getMin(), 
+							'seg':j_actual.getSeg(), 
+							'mili':j_actual.getMili()
+						});
+						insertado = true; 
+						break;
+					}
+			}
+		}
+
+		if (!insertado) {
+			orden.push(j_actual);
+			arr_guardar.push({
+				'nombre':j_actual.getNombre(),
+				'favor':j_actual.getPuntosFavor(),
+				'contra':j_actual.getPuntosContra(),
+				'hr':j_actual.getHr(), 
+				'min':j_actual.getMin(), 
+				'seg':j_actual.getSeg(), 
+				'mili':j_actual.getMili()
+			});
+		}
+	}
+
+	var html = ''; 
+	if (this.jugadores.size == 1) {
+		// recupero historial guardado, agrego este ultimo y guardo ordenado
+		var data = localStorage.getItem('jugadores_1');
+		if (data) {
+			var orden = JSON.parse(data).jugadores;
+			orden.push(arr_guardar[0]);
+			arr_guardar = []; 
+
+			for (var j = 0; j<orden.length; j++) {
+				var insertado = false;
+				for(var i = 0; i<arr_guardar.length; i++) {
+					if ( Number(arr_guardar[i].favor) < Number(orden[j].favor) ) {
+						arr_guardar.splice(i,0,orden[j]);
+						insertado = true; 
+						break;
+					} else if ( 
+						Number(arr_guardar[i].favor) == Number(orden[j].favor) && 
+						Number(arr_guardar[i].contra) > Number(orden[j].contra)
+						) {
+							arr_guardar.splice(i,0,orden[j]);
+							insertado = true; 
+							break;
+					} else if (
+						Number(arr_guardar[i].favor) == Number(orden[j].favor) && 
+						Number(arr_guardar[i].contra) == Number(orden[j].contra)
+					) {
+
+						var suma_i = Number(arr_guardar[i].mili) + (Number(arr_guardar[i].seg) * 1000) + (Number(arr_guardar[i].min) * 60 * 1000) + (Number(arr_guardar[i].hr) * 60 * 60 * 1000);
+						var suma_j = Number(orden[j].mili) + (Number(orden[j].seg) * 1000) + (Number(orden[j].min) * 60 * 1000) + (Number(orden[j].hr) * 60 * 60 * 1000);
+
+						if (suma_j < suma_i) {
+							arr_guardar.splice(i,0,orden[j]);
+							insertado = true; 
+							break;
+						}
+					}
+				}
+
+				if (!insertado) {
+					arr_guardar.push(orden[j]);
+				}
+			}
+		}
+	}
+	
+	localStorage.setItem( this.columnas+'x'+this.filas+'_'+jugadores.size, JSON.stringify({'jugadores':arr_guardar}) );
+	//localStorage.setItem('jugadores_'+jugadores.size, JSON.stringify({nxm:{'jugadores':arr_guardar}}));
+
+	// muestro info en ventana modal
+	verHistorial(jugadores.size);
 }
 
 /**
@@ -440,8 +645,8 @@ function selectDificultad() {
 	var dificultad = $('#id_dificultad').val(); 
 
 	var nxm = dificultad.split('x');
-	filas = nxm[0];
-	columnas = nxm[1];
+	columnas = nxm[0];
+	filas = nxm[1];
 
 	cant_cartas_pendientes = filas*columnas; 
 }
@@ -453,17 +658,17 @@ function cargarCartas() {
 	
 	$('#id_tablero').empty(); 
 
-	var width_card = 100 / filas; 
-	var height_card = 100 / columnas; 
+	var width_card = 100 / columnas; 
+	var height_card = 100 / filas; 
 
 	var html = '';
-	for(var c = 0; c<columnas; c++) {
-		html += '<div id="id-fila+'+c+'" class="fila">'; 
+	for(var f = 0; f<filas; f++) {
+		html += '<div id="id-fila+'+f+'" class="fila">'; 
 
-		for(var f = 0; f<filas; f++) {
+		for(var c = 0; c<columnas; c++) {
 			var id = 'id_c'+f+c; 
 
-			html += '<div id="id-columna-"'+f+' class="columna">'; 
+			html += '<div id="id-columna-"'+c+' class="columna">'; 
 
 			html += '<div class="flip-card">';
 			html += '		<div id="'+id+'" class="flip-card-inner">';
@@ -630,6 +835,56 @@ function initRandomCartas() {
 
 	cartas =  aux_cartas;
 	imagenes = imagenes.concat(aux_imagenes);
+}
+
+function verHistorial(j_in = 1) {
+	// ciclar dificultad y mostrar info
+	console.log(localStorage);
+	
+		var cant_jugadores = this.color_jugadores.length;
+		for(var j=1; j<=cant_jugadores; j++) {
+			var data = localStorage.getItem(this.columnas+'x'+this.filas+'_'+j);
+			console.log(data);
+			if (data) {
+				var html = ''; 
+				html += '<table class="table">';
+				html += '<thead>';
+				html += '<tr>'; 
+				html += '<th scope="col">Pos</th>';
+				html += '<th scope="col">Nombre</th>';
+				html += '<th scope="col">Puntos Favor</th>';
+				html += '<th scope="col">Puntos Contra</th>';
+				html += '<th scope="col">Tiempo</th>';
+				html += '</tr>'; 
+				html += '</thead>';
+				html += '<tbody>';
+
+				var orden = JSON.parse(data).jugadores;
+				console.log(orden);
+				for(var i = 0; i<orden.length; i++) {
+					console.log(orden[i]);
+					html += '<tr>';
+					html += '<th scope="row">'+(i+1)+'</th>';
+					html += '<td>'+orden[i].nombre+'</td>';
+					html += '<td>'+orden[i].favor+'</td>';
+					html += '<td>'+orden[i].contra+'</td>';
+					html += '<td>'+orden[i].hr+':'+orden[i].min+''+orden[i].seg+'.'+orden[i].mili+'</td>';
+					html += '</tr>';
+				}
+
+				html += '</tbody>'; 
+				html += '</table>';
+
+				$('#tab_jugador_'+j).html(html);
+			} else {
+				$('#tab_jugador_'+j).html('Aún no hay datos para mostrar');
+			}
+		}
+	
+
+	//tab_jugador_
+	$('#myTab li:nth-child('+j_in+') a').tab('show');
+	$("#id_modal").modal();
 
 }
 
