@@ -41,7 +41,7 @@ Intercambiar cartas: si se selecciona esta opción, al seleccionar dos cartas di
 
 No mostrar cartas al inicio: al seleccionar esta opción, al iniciar una jugada las cartas no van a ser vistas. Es decir que el primer jugador no va a tener ningún tipo de ayuda por donde comenzar. 
 
-### ***Historial***
+### **Historial**
 
 Como se mencionó anteriormente, los resultados van a ser guardados en un historial. 
 
@@ -56,12 +56,12 @@ Para ver el historial de una jugada particular, se deberá seleccionar:
 
 Seleccionando una combinación de estas tres opciones se va a mostrar el historial para 1, 2 o 3 jugadores. 
 
-### ***Estilos de Carta***
+### **Estilos de Carta**
 
 Actualmente existen 3 estilos distintos de cartas (solo varía en las imágenes de las cartas, no afecta al juego en si). Es solo una opción decorativa y no se tiene en cuenta en el historial. 
 
 
-### ***Información de documentación y recursos usados en la implementación***
+### **Información de documentación y recursos usados en la implementación**
 
 #### Información general de css y javascript: 
 
