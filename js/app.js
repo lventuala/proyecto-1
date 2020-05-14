@@ -214,7 +214,7 @@ var html_item = "";
 var html_info = ""; 
 for(var j = 1; j<=color_jugadores.length; j++) {
 	
-//	localStorage.removeItem('jugadores_'+j);
+	//localStorage.removeItem('jugadores_'+j);
 
 
 	$('#id_select_jugadores').append('<option value="'+j+'">'+j+' '+(j==1?'jugador':'jugadores')+'</option>'); 
@@ -237,7 +237,7 @@ tab_html += '</ul>';
 tab_html += '<div class="tab-content" id="myTabContent">'; 
 tab_html += html_info; 
 tab_html += '</div>'; 
-$("#id_modal div div").html(tab_html);
+$("#id_modal div div .modal-body").html(tab_html);
 
 //$('#myTab li:nth-child(1) a').tab('show');
 //$("#id_modal").modal();
@@ -538,8 +538,26 @@ function guardarYMostrarJugadorGanador() {
 	if (this.jugadores.size == 1) {
 		// recupero historial guardado, agrego este ultimo y guardo ordenado
 		var data = localStorage.getItem('jugadores_1');
-		if (data) {
-			var orden = JSON.parse(data).jugadores;
+		var orden = null; 
+		if (data != undefined) {
+			data = JSON.parse(data); 
+
+			data = data[this.columnas+'x'+this.filas]; 
+
+			if (data != undefined) {
+				data = data[this.no_mostrar_cartas_iniciales]; 
+
+				if (data != undefined) {
+					data = data[this.intercambiar_cartas];
+
+					if (data != undefined) {
+						orden = data['jugadores'];
+					}
+				}
+			}
+		}
+
+		if (orden != undefined && orden != null && orden.length > 0) {
 			orden.push(arr_guardar[0]);
 			arr_guardar = []; 
 
@@ -579,9 +597,15 @@ function guardarYMostrarJugadorGanador() {
 			}
 		}
 	}
-	
-	localStorage.setItem( this.columnas+'x'+this.filas+'_'+jugadores.size, JSON.stringify({'jugadores':arr_guardar}) );
-	//localStorage.setItem('jugadores_'+jugadores.size, JSON.stringify({nxm:{'jugadores':arr_guardar}}));
+
+	var object_storage = {};
+	object_storage[this.columnas+'x'+this.filas] = {};
+	object_storage[this.columnas+'x'+this.filas][this.no_mostrar_cartas_iniciales] = {};
+	object_storage[this.columnas+'x'+this.filas][this.no_mostrar_cartas_iniciales][this.intercambiar_cartas] = {};
+	object_storage[this.columnas+'x'+this.filas][this.no_mostrar_cartas_iniciales][this.intercambiar_cartas]['jugadores'] = arr_guardar; 
+
+	// guardo objeto
+	localStorage.setItem( 'jugadores_'+jugadores.size, JSON.stringify(object_storage) );
 
 	// muestro info en ventana modal
 	verHistorial(jugadores.size);
@@ -839,52 +863,90 @@ function initRandomCartas() {
 
 function verHistorial(j_in = 1) {
 	// ciclar dificultad y mostrar info
-	console.log(localStorage);
-	
-		var cant_jugadores = this.color_jugadores.length;
-		for(var j=1; j<=cant_jugadores; j++) {
-			var data = localStorage.getItem(this.columnas+'x'+this.filas+'_'+j);
-			console.log(data);
-			if (data) {
-				var html = ''; 
-				html += '<table class="table">';
-				html += '<thead>';
-				html += '<tr>'; 
-				html += '<th scope="col">Pos</th>';
-				html += '<th scope="col">Nombre</th>';
-				html += '<th scope="col">Puntos Favor</th>';
-				html += '<th scope="col">Puntos Contra</th>';
-				html += '<th scope="col">Tiempo</th>';
-				html += '</tr>'; 
-				html += '</thead>';
-				html += '<tbody>';
+	this.no_mostrar_cartas_iniciales = $('#id_no_mostrar_cartas').is(':checked'); 
+	this.intercambiar_cartas = $('#id_intercambiar_cartas').is(':checked');
 
-				var orden = JSON.parse(data).jugadores;
-				console.log(orden);
-				for(var i = 0; i<orden.length; i++) {
-					console.log(orden[i]);
-					html += '<tr>';
-					html += '<th scope="row">'+(i+1)+'</th>';
-					html += '<td>'+orden[i].nombre+'</td>';
-					html += '<td>'+orden[i].favor+'</td>';
-					html += '<td>'+orden[i].contra+'</td>';
-					html += '<td>'+orden[i].hr+':'+orden[i].min+''+orden[i].seg+'.'+orden[i].mili+'</td>';
-					html += '</tr>';
-				}
+	html_config = 'Configuracion: <br>'; 
+	html_config += 'Tablero de '+this.columnas+'x'+this.filas+'<br>';
+	html_config += (this.intercambiar_cartas?'':'No ')+'Intercambiar Cartas<br>';
+	html_config += (this.no_mostrar_cartas_iniciales?'No ':'')+'Mostrar Cartas Iniciales<br>';
 
-				html += '</tbody>'; 
-				html += '</table>';
+	$('#id_header_historial').html(html_config); 
 
-				$('#tab_jugador_'+j).html(html);
-			} else {
-				$('#tab_jugador_'+j).html('Aún no hay datos para mostrar');
-			}
+	var cant_jugadores = this.color_jugadores.length;
+	for(var j=1; j<=cant_jugadores; j++) {
+		var data = localStorage.getItem('jugadores_'+j);
+		if (data == undefined) {
+			$('#tab_jugador_'+j).html('Aún no hay datos para mostrar');
+			continue;
 		}
-	
+
+		data = JSON.parse(data); 
+
+		data = data[this.columnas+'x'+this.filas]; 
+
+		if (data == undefined) {
+			$('#tab_jugador_'+j).html('Aún no hay datos para mostrar');
+			continue;
+		}
+
+		data = data[this.no_mostrar_cartas_iniciales]; 
+
+		if (data ==undefined) {
+			$('#tab_jugador_'+j).html('Aún no hay datos para mostrar');
+			continue;
+		}
+
+		data = data[this.intercambiar_cartas];
+
+		if (data ==undefined) {
+			$('#tab_jugador_'+j).html('Aún no hay datos para mostrar');
+			continue;
+		}
+		
+		orden = data['jugadores'];
+
+		if (orden  == undefined || orden.length <= 0) {
+			$('#tab_jugador_'+j).html('Aún no hay datos para mostrar');
+			continue;
+		}
+
+		var html = ''; 
+		html += '<table class="table">';
+		html += '<thead>';
+		html += '<tr>'; 
+		html += '<th scope="col">Pos</th>';
+		html += '<th scope="col">Nombre</th>';
+		html += '<th scope="col">Puntos Favor</th>';
+		html += '<th scope="col">Puntos Contra</th>';
+		html += '<th scope="col">Tiempo</th>';
+		html += '</tr>'; 
+		html += '</thead>';
+		html += '<tbody>';
+
+		for(var i = 0; i<orden.length; i++) {
+			html += '<tr>';
+			html += '<th scope="row">'+(i+1)+'</th>';
+			html += '<td>'+orden[i].nombre+'</td>';
+			html += '<td>'+orden[i].favor+'</td>';
+			html += '<td>'+orden[i].contra+'</td>';
+			html += '<td>'+orden[i].hr+':'+orden[i].min+''+orden[i].seg+'.'+orden[i].mili+'</td>';
+			html += '</tr>';
+		}
+
+		html += '</tbody>'; 
+		html += '</table>';
+
+		$('#tab_jugador_'+j).html(html);
+	}
 
 	//tab_jugador_
 	$('#myTab li:nth-child('+j_in+') a').tab('show');
 	$("#id_modal").modal();
+}
 
+function borrarHistorial() {
+	localStorage.clear();
+	verHistorial();
 }
 
